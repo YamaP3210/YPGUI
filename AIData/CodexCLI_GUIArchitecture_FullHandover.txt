@@ -1,0 +1,315 @@
+# CodexCLI GUI Architecture Project - Full Handover
+
+## Project Background
+
+The original goal of this project is:
+
+To develop a custom GUI client application for CodexCLI.
+
+This is NOT intended to be a traditional WPF application project.
+
+The primary motivation is:
+
+- Create a GUI environment specialized for CodexCLI workflows
+- Obtain Unity-like runtime control feeling
+- Avoid conventional WPF/MVVM framework-driven architecture
+- Maintain direct C# ownership over runtime UI behavior
+- Preserve explicit runtime control and predictability
+
+The project is currently Windows-only.
+
+Cross-platform support is NOT a design goal at this stage.
+
+The development environment is:
+
+- Rider
+- .NET
+- WPF
+- WebView2
+
+---
+
+# Why Existing WPF/MVVM Approaches Were Rejected
+
+The user strongly prefers:
+
+- Explicit runtime control
+- Imperative UI manipulation
+- Runtime-owned UI state
+- Predictable update flow
+- Unity/WinForms-like mental model
+
+The user intentionally avoids:
+
+- DataBinding-centric architecture
+- DependencyProperty-centric architecture
+- DataContext-driven design
+- Framework-owned synchronization
+- Reactive UI systems
+- Virtual DOM style rendering ownership
+- Automatic MVVM toolkit assumptions
+
+The project intentionally treats WPF as a thin shell only.
+
+---
+
+# Final GUI Direction
+
+The final architectural direction became:
+
+WPF shell
++
+WebView2
++
+HTML/CSS UI
++
+C#-centric runtime ownership
++
+JS as DOM driver only
+
+Responsibilities:
+
+WPF:
+- Window
+- Menu
+- Toolbar
+- StatusBar
+- Native integration
+- WebView2 hosting
+
+HTML:
+- UI structure
+
+CSS:
+- Layout
+- Theme
+- Visual design
+
+C#:
+- Application logic
+- UI state
+- Runtime control
+- Event handling
+- View orchestration
+
+JS:
+- DOM access
+- DOM mutation
+- Event forwarding
+- Utility functions only
+
+JS must NOT own application state.
+
+---
+
+# Architectural Philosophy
+
+The architecture intentionally resembles Unity-style UI control.
+
+Preferred style:
+
+```csharp
+await Dom.SetTextAsync(...);
+await View.RefreshAsync();
+```
+
+The architecture prioritizes:
+
+- Explicit updates
+- Direct control
+- Scoped DOM access
+- Runtime ownership
+- Predictability
+- Local UI hierarchy control
+
+The architecture intentionally avoids automatic synchronization systems.
+
+---
+
+# DOM Philosophy
+
+The DOM is treated similarly to a Unity hierarchy.
+
+Example:
+
+LoginForm
+ ├ UserName
+ ├ Password
+ └ Submit
+
+Preferred access style:
+
+```csharp
+var form = Dom.Scope(UiId.LoginForm);
+
+await form.SetValueAsync(UiId.UserName, "abc");
+await form.SetValueAsync(UiId.Password, "1234");
+```
+
+Scoped DOM access is preferred.
+
+---
+
+# MVVM Interpretation
+
+The project still broadly follows MVVM principles, but with a custom interpretation.
+
+Model:
+- data
+- state
+- business control
+
+ViewModel:
+- UI state management
+- UI coordination
+- feature orchestration
+
+View:
+- HTML
+- XAML
+- Prefab
+- display definition itself
+
+C# UI classes are NOT considered the View itself.
+
+C# UI classes are closer to:
+
+- ViewController
+- UI runtime controller
+- View connector
+
+ViewModel is NOT required to map 1:1 with View.
+
+---
+
+# Library Direction
+
+The architecture itself will become a reusable WPF/WebView2-based framework library.
+
+Current stance:
+
+- WPF-only is acceptable
+- Cross-platform abstraction is NOT required
+- Premature generalization should be avoided
+
+The framework is positioned as:
+
+"WPF/WebView2-based C#-centric GUI architecture"
+
+The foundation library should provide:
+
+- WebView2 hosting
+- DomDriver
+- DomScope
+- JS/C# bridge
+- Event bridge
+- ViewComponent base systems
+- UiId systems
+- Runtime lifecycle systems
+
+The foundation library should NOT contain:
+
+- App-specific screens
+- Business logic
+- Concrete UI implementations
+
+Optional reusable controls may later become separate libraries.
+
+---
+
+# Web Reuse Philosophy
+
+The project does NOT currently target Web deployment.
+
+However:
+
+- HTML
+- CSS
+- DOM structure
+- data-ui-id structure
+
+are intentionally kept reusable as design assets.
+
+The user currently does NOT want to complicate the architecture for future web migration.
+
+Therefore:
+
+- JS may remain WebView2-specific
+- Web migration would later rebuild JS/ViewModel structure separately
+- Only the design/UI layer is expected to be reused
+
+This is intentional.
+
+---
+
+# AI Assistance Policy
+
+The project will be developed collaboratively with AI assistance.
+
+The user does NOT want full monolithic auto-generated frameworks.
+
+Preferred workflow:
+
+- Incremental architecture discussion
+- Manual structure construction
+- Small-step implementation
+- Continuous review
+- Architecture consistency checking
+
+The assistant should act as:
+
+- Architectural reviewer
+- Design advisor
+- Structural consistency checker
+- Incremental implementation helper
+
+not as a fully automatic framework generator.
+
+---
+
+# Coding Rules Context
+
+A separate coding rules document already exists.
+
+That document should be treated as the primary coding standard.
+
+The coding rules are extremely important because:
+
+- The architecture intentionally differs from standard WPF culture
+- Naming meaning is prioritized heavily
+- Framework drift must be avoided
+- C# UI controller interpretation is non-standard
+- MVVM interpretation is customized
+- Unity-style runtime philosophy is important
+
+Important interpretations:
+
+- Code should read naturally as English
+- Meaning > mechanical naming
+- virtual = optional extension point
+- abstract = required responsibility
+- OnXxx = processing when Xxx occurs
+- OnXxx is NOT event firing
+- Base classes should work correctly without override
+
+---
+
+# Important Development Context
+
+The current stage is:
+
+Architecture establishment before full implementation.
+
+The next phase will begin:
+
+- Creating Rider solution
+- Creating initial WPF framework/library
+- Establishing project structure
+- Building minimal WebView2 host
+- Building DomDriver
+- Building JS bridge
+- Establishing ViewComponent structure
+
+The project is still in the architecture establishment phase.
+
+Avoid prematurely overengineering the system.

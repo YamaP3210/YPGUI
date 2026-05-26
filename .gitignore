@@ -1,0 +1,32 @@
+# Build outputs
+bin/
+obj/
+artifacts/
+packages/
+
+# Rider / ReSharper
+.idea/
+*.sln.iml
+*.DotSettings.user
+riderModule.iml
+_ReSharper.Caches/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# Test / coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# NuGet packages
+*.nupkg
+*.snupkg
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

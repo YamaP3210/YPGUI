@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YPGUIDemo", "YPGUIDemo\YPGUIDemo.csproj", "{B96D1A5C-35DA-4354-B4E1-42A9E5512C6D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YPGUI", "YPGUI\YPGUI.csproj", "{DD6600A4-6572-4CE3-9025-AF1F70D0A1EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B96D1A5C-35DA-4354-B4E1-42A9E5512C6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B96D1A5C-35DA-4354-B4E1-42A9E5512C6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B96D1A5C-35DA-4354-B4E1-42A9E5512C6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B96D1A5C-35DA-4354-B4E1-42A9E5512C6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD6600A4-6572-4CE3-9025-AF1F70D0A1EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD6600A4-6572-4CE3-9025-AF1F70D0A1EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD6600A4-6572-4CE3-9025-AF1F70D0A1EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD6600A4-6572-4CE3-9025-AF1F70D0A1EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
