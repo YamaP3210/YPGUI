@@ -1,16 +1,27 @@
-# CodexCLI GUI Architecture Project - Full Handover
+﻿# Markup View Framework Architecture Project - Full Handover
 
 ## Project Background
 
-The original goal of this project is:
+Markup View Framework, identified as MVF, is a framework-class library that provides an architecture optimized for developing Windows GUI applications.
 
-To develop a custom GUI client application for CodexCLI.
+MVF is NOT an application. MVF is a framework for building Windows GUI applications.
 
-This is NOT intended to be a traditional WPF application project.
+MVF is NOT a CodexCLI client. A CodexCLI client may later be developed as a separate application that uses MVF, but that client is outside the current MVF scope.
+
+The architecture is based on WPF, while the client area is built with WebView2 inside the XAML/WPF window framework.
+Project history note:
+
+- A CodexCLI client was an earlier application idea.
+- During environment and architecture discussion, the priority shifted to creating the user's own optimal Windows GUI development framework first.
+- MVF started as that framework effort.
+- Any CodexCLI client should be treated only as a possible future consumer application of MVF, not as MVF itself.
+- For current MVF design work, CodexCLI-specific requirements should be ignored unless explicitly reintroduced.
 
 The primary motivation is:
 
-- Create a GUI environment specialized for CodexCLI workflows
+- Provide an optimal architecture for the user's Windows GUI application development
+- Use WPF as the native window shell and XAML-side host framework
+- Build the client UI area with WebView2, HTML, CSS, and DOM control
 - Obtain Unity-like runtime control feeling
 - Avoid conventional WPF/MVVM framework-driven architecture
 - Maintain direct C# ownership over runtime UI behavior
@@ -99,7 +110,51 @@ JS:
 - Utility functions only
 
 JS must NOT own application state.
+---
 
+# Window Composition
+
+MVF windows are composed with XAML/WPF as the native window framework.
+
+The basic window structure contains three regions:
+
+- Header region
+- Client region
+- Footer region
+
+Header region:
+- Hosts menus, toolbars, command bars, and other upper window UI.
+- Belongs to the WPF/XAML side.
+- Concrete content, size, visibility, layout, and style are customized by the consumer-side View definition.
+
+Client region:
+- Hosts the actual application runtime UI area.
+- Uses WebView2-based client content.
+- HTML/CSS/DOM define the visible UI inside each WebView2 client content.
+- C# owns runtime state, orchestration, and DOM control.
+
+Footer region:
+- Hosts status bars, notifications, progress indicators, and other lower window UI.
+- Belongs to the WPF/XAML side.
+- Concrete content, size, visibility, layout, and style are customized by the consumer-side View definition.
+
+MVF must not fix concrete Header/Footer design or region sizes. These belong to the View customization layer.
+
+## Client Content Model
+
+The Client region is not limited to a single fixed WebView2 instance.
+
+MVF should support one or more WebView2-based client contents and allow the active client content to be switched, such as with tabs.
+
+Multiple HTML-based client contents may coexist in the same window.
+
+The preferred model is:
+
+- A WPF/XAML ClientHost owns the client content collection and active selection.
+- Each client content may own its own WebView2 runtime when persistent independent state is required.
+- The framework may also provide a lighter navigation/swap model for simple cases, but it must not replace the persistent multi-content model.
+- Tab headers, selection UI, and presentation style are View concerns and should remain customizable.
+- C# remains the owner of client content lifecycle, state, and DOM access routing.
 ---
 
 # Architectural Philosophy
@@ -184,7 +239,7 @@ ViewModel is NOT required to map 1:1 with View.
 
 # Library Direction
 
-The architecture itself will become a reusable WPF/WebView2-based framework library.
+The framework itself is the core product: a reusable WPF/WebView2-based Windows GUI application development framework-class library.
 
 Current stance:
 
@@ -194,7 +249,7 @@ Current stance:
 
 The framework is positioned as:
 
-"WPF/WebView2-based C#-centric GUI architecture"
+"WPF-based, WebView2-client-area, C#-centric Windows GUI application framework"
 
 The foundation library should provide:
 
@@ -210,6 +265,7 @@ The foundation library should provide:
 The foundation library should NOT contain:
 
 - App-specific screens
+- Consumer-application-specific workflow logic
 - Business logic
 - Concrete UI implementations
 

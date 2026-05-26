@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YPGUIDemo", "YPGUIDemo\YPGUIDemo.csproj", "{B96D1A5C-35DA-4354-B4E1-42A9E5512C6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVFDemo", "MVFDemo\MVFDemo.csproj", "{B96D1A5C-35DA-4354-B4E1-42A9E5512C6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YPGUI", "YPGUI\YPGUI.csproj", "{DD6600A4-6572-4CE3-9025-AF1F70D0A1EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVF", "MVF\MVF.csproj", "{DD6600A4-6572-4CE3-9025-AF1F70D0A1EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

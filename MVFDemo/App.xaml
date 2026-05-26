@@ -1,7 +1,7 @@
-﻿<Application x:Class="YPGUIDemo.App"
+﻿<Application x:Class="MVFDemo.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:YPGUIDemo"
+             xmlns:local="clr-namespace:MVFDemo"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

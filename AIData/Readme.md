@@ -1,4 +1,4 @@
-# AIData
+﻿# AIData
 
 This folder stores project memory for AI-assisted development.
 
@@ -8,7 +8,7 @@ folder, especially the architecture handover and current coding rules.
 The following files are the primary authority for this project:
 
 - `Readme.md`
-- `CodexCLI_GUIArchitecture_FullHandover.txt`
+- `MVF_Architecture_FullHandover.txt`
 - `CSharpCodingRules_Current.txt`
 
 These three files must be understood before any other AIData file. If another
@@ -17,8 +17,8 @@ precedence unless they are explicitly updated.
 
 ## Files
 
-- `CodexCLI_GUIArchitecture_FullHandover.txt`
-  - Stores the YPGUI architectural background, design philosophy, responsibility boundaries, and current direction.
+- `MVF_Architecture_FullHandover.txt`
+  - Stores the MVF architectural background, design philosophy, responsibility boundaries, and current direction as a WPF-based Windows GUI application development framework-class library.
 - `CSharpCodingRules_Current.txt`
   - Stores the current C# coding, naming, structure, and design rules for this solution.
 

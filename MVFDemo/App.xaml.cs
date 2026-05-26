@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace YPGUIDemo;
+namespace MVFDemo;
 
 /// <summary>
 /// Interaction logic for App.xaml
