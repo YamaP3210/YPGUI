@@ -235,6 +235,161 @@ C# UI classes are closer to:
 
 ViewModel is NOT required to map 1:1 with View.
 
+## Root Module Exception
+
+`MVFRootModule` is the ViewModel for the MVF root control written in XAML.
+
+This module is a special root-level exception because its direct target is a XAML control.
+
+Other UI modules should primarily follow the normal MVF direction:
+
+- C# owns runtime state and orchestration
+- WebView2 hosts client content
+- HTML/CSS/DOM define client UI structure and presentation
+- JS acts only as a DOM driver and event forwarder
+
+The root module exists to connect the XAML-side MVF root control with the runtime module structure.
+
+The basic XAML framework area should be placed under `MVF.UI.Frame`.
+
+`Frame` is a category name that means the UI framework / structural frame, similar to how `Core` can name a foundational category.
+
+Types or XAML files inside this namespace do not need to repeat `Frame` in their names unless the type itself specifically represents a frame.
+
+For example, the root XAML should be named `MVFRoot.xaml`, not `MVFRootFrame.xaml`, because `Frame` is the containing category rather than the direct object name.
+
+XAML files under `MVF.UI.Frame` must not have code-behind `.xaml.cs` files unless WPF makes them absolutely unavoidable.
+
+In MVF's design philosophy, the UI should ideally be written entirely in HTML.
+
+HTML View is not just another View option; it is the intended primary UI definition layer and is treated as the more capable replacement for XAML in MVF.
+
+XAML exists only because WPF requires it for the native window itself and for the minimal non-client / host-side framework structure outside the WebView2 client area.
+
+Therefore the question is not whether XAML should contain behavior.
+
+The stronger rule is that XAML itself should not exist unless it is required by WPF integration.
+
+When XAML is unavoidable, it should be kept to the minimum structural WPF host definition needed to compose the window, regions, and WebView2 host.
+
+Runtime behavior, state, orchestration, and connection logic should live in MVF modules and runtime systems, such as `MVFRootModule`, not in `.xaml.cs`.
+
+The `MVF.UI.Frame` namespace should contain only the XAML required to place the broad content frame inside the WPF window.
+
+It should not define concrete application layout beyond the minimum host-side composition required by WPF.
+
+The client area frame should directly host WebView2 as `MVFViewHost`.
+
+`MVFViewHost` is the WPF/WebView2-side host that displays the HTML View.
+
+The basic visual layout should be controlled by CSS in the consumer application's View folder.
+
+Application-side HTML/CSS Views own the layout and presentation of the actual application UI.
+
+The MVF HTML root should be named `MVFViewCanvas`.
+
+`MVFViewCanvas` is the HTML/DOM-side root canvas loaded into the WPF/WebView2 host.
+
+MVF should not define or manage the consumer application's CSS structure.
+
+The MVF-provided `MVFViewCanvas.css` should only provide the minimum initial values required for the HTML view root to fill the WebView2 surface.
+
+Consumer applications may organize and load their own CSS freely.
+
+`MVFRootModule` may provide CSS loading methods so application-side C# control can add application CSS after `MVFViewCanvas` is loaded.
+
+## HTML View Loading Model
+
+The preferred MVF UI construction model follows the user's Unity workflow.
+
+In Unity, the user does not statically place UI in the Scene view.
+
+The user creates UI components separately and places them at runtime by loading Prefabs during startup and control flow.
+
+MVF should follow the same mental model.
+
+The initial frame HTML should act like a runtime scene root / canvas target, not like a fully statically composed screen.
+
+Application modules are loaded and controlled by C#.
+
+Modules should not be imported or owned by the frame HTML.
+
+Instead, C# loads modules and then flows the required child View / Prefab HTML content into the frame HTML in order.
+
+The frame HTML may provide broad insertion points, but it should not own module composition.
+
+The default `MVFViewCanvas` HTML is framework-level infrastructure and belongs to the MVF library, not to each consumer application.
+
+Consumer applications should provide Widgets, Components, Parts, and module control code, but should not duplicate the common MVF frame HTML.
+
+HTML View fragments below the module level may be treated like Prefab units.
+
+These smaller View / Prefab units can be loaded into the current DOM hierarchy as directed by C#.
+
+In consumer applications, `UI/Modules` is for ViewModel / module control code and must not be placed under `View`.
+
+The consumer application View folder should be named `UI/View`, not `UI/Views`.
+
+`UI/View` should contain View-side assets such as `Frame`, `Widgets`, `Components`, and `Parts`.
+
+`Widgets`, `Components`, and `Parts` are View construction units below the module control layer.
+
+`UI/View/Widgets` should place widget HTML files directly under the folder without per-widget subfolders.
+
+Parts, Components, and Widgets are role-based classifications, not a strict mandatory hierarchy.
+
+A Part does not have to be wrapped by a Component.
+
+A Widget does not have to be composed only from Components.
+
+However, Widget is mandatory as the top-level ViewModel-facing View unit.
+
+Modules must not directly operate Components or Parts.
+
+Modules may operate Widgets, and Widgets then own how Components and Parts are placed inside their DOM structure.
+
+Widgets are bundles that place Components and/or Parts inside their own DOM structure.
+
+Names such as `MVFDemoMainWidget`, `MVFDemoMainPanel`, and `MVFDemoMainContent` should be interpreted as the `Widget`, `Panel`, or content area belonging to the `MVFDemoMain` concept.
+
+They must not be interpreted as establishing generic concepts named `MainWidget`, `MainPanel`, or `MainContent`.
+
+Similarly, the current sample structure with a `header` and `MVFDemoMainContent` area is only an example of one Panel's internal DOM.
+
+It does not define a required Panel structure.
+
+Component internals are free and should be designed according to the actual UI concept.
+
+A Widget HTML usually describes the placement structure for the Components it owns.
+
+However, a Widget is not required to place only Components.
+
+For a small Widget, it is acceptable for the Widget to directly place Parts and effectively compose itself as the Component-level structure.
+
+When a Component exists only for one Widget, placing it under `UI/View/Components/{WidgetName}` is natural and preferred for clarity.
+
+Files under `UI/View/Components` and `UI/View/Parts` should not mechanically add `Component` or `Part` to their file names.
+
+Those folders are categories, while each file should be named after the actual UI concept it represents, such as `Form`, `Panel`, or another natural control name.
+
+When `UI/View/Parts` uses a subfolder for parts that belong to a specific parent component, the subfolder name should clearly identify that parent component, such as `MVFDemoMainPanel`.
+
+Avoid vague subfolder names such as `Main` when the folder exists because the parts belong to a more specific parent.
+
+However, creating parent-specific subfolders under `Parts` should be uncommon.
+
+Parts are generally expected to be reusable, generic UI units.
+
+It is acceptable to create a Part by combining multiple smaller UI elements, but many Parts that are tied to only one specific Component can indicate a design problem.
+
+Component-specific Part folders are allowed but should not become the default structure.
+
+Components may more naturally have Widget-specific subfolders because a Component may reasonably exist only for one Widget.
+
+`Widget` is different because Widget is an established MVF view control concept and may be included in Widget file names.
+
+JS remains only the DOM driver that performs insertion, mutation, and event forwarding.
+
 ---
 
 # Library Direction

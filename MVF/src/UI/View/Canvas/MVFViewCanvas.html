@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MVF</title>
+    <style>
+{{MVFViewCanvasStyle}}
+    </style>
+</head>
+<body>
+    <main class="mvf-view-canvas" data-ui-id="MVFViewCanvas">
+        <section class="mvf-module-root" data-ui-id="MVFModuleRoot"></section>
+    </main>
+
+    <script>
+        window.MVF = {
+            dom: {
+                loadStyle: function (styleUri) {
+                    const linkElement = document.createElement('link');
+                    linkElement.rel = 'stylesheet';
+                    linkElement.href = styleUri;
+                    document.head.appendChild(linkElement);
+                },
+
+                setHtml: function (targetUiId, viewHtml) {
+                    const targetElement = document.querySelector('[data-ui-id="' + targetUiId + '"]');
+
+                    if (!targetElement) {
+                        throw new Error('MVF target was not found: ' + targetUiId);
+                    }
+
+                    targetElement.innerHTML = viewHtml;
+                }
+            }
+        };
+    </script>
+</body>
+</html>

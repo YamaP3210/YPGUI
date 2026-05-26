@@ -8,4 +8,18 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="src\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MVF\MVF.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="src\UI\View\**\*.*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
