@@ -203,6 +203,31 @@ await form.SetValueAsync(UiId.Password, "1234");
 
 Scoped DOM access is preferred.
 
+However, `data-ui-id` must NOT be treated as a required identifier for every
+HTML element.
+
+Only root-level or otherwise important larger UI units should be required to
+have stable externally-addressable identifiers such as `data-ui-id`.
+
+Smaller child elements should normally be found from inside the parent
+Component's DOM scope by local search such as `name`, role-like attributes,
+or other suitable local selectors.
+
+MVF should avoid turning the entire HTML tree into a globally-addressed ID map.
+
+When a parent Component finds a child node and wants to attach another
+Component instance to that exact node, MVF may use a JS-side runtime node
+handle system.
+
+In that model, JS keeps the actual DOM node reference and C# holds only a
+handle or scope-like wrapper that resolves back to that node through the JS
+bridge.
+
+Those handles are runtime references, not durable HTML identifiers.
+
+If a parent DOM region is replaced, the child handles under that replaced
+region should be treated as invalid and reacquired explicitly.
+
 ---
 
 # MVVM Interpretation
@@ -320,7 +345,8 @@ The frame HTML may provide broad insertion points, but it should not own module 
 
 The default `MVFViewCanvas` HTML is framework-level infrastructure and belongs to the MVF library, not to each consumer application.
 
-Consumer applications should provide Widgets, Components, Parts, and module control code, but should not duplicate the common MVF frame HTML.
+Consumer applications should provide Components and module control code, but
+should not duplicate the common MVF frame HTML.
 
 HTML View fragments below the module level may be treated like Prefab units.
 
@@ -330,25 +356,35 @@ In consumer applications, `UI/Modules` is for ViewModel / module control code an
 
 The consumer application View folder should be named `UI/View`, not `UI/Views`.
 
-`UI/View` should contain View-side assets such as `Frame`, `Widgets`, `Components`, and `Parts`.
+`UI/View` should contain View-side assets such as `Frame`, `Widgets`, and
+`Components`.
 
-`Widgets`, `Components`, and `Parts` are View construction units below the module control layer.
+`Widgets` and `Components` are View construction units below the module control
+layer.
 
 `UI/View/Widgets` should place widget HTML files directly under the folder without per-widget subfolders.
 
-Parts, Components, and Widgets are role-based classifications, not a strict mandatory hierarchy.
+Widgets and Components are role-based classifications, not a strict mandatory
+hierarchy.
 
-A Part does not have to be wrapped by a Component.
+A Widget does not have to be composed only from child Components that each map
+to separately identified HTML roots.
 
-A Widget does not have to be composed only from Components.
+The current design direction is that the minimum ViewModel/UI-controller unit is
+`Component`.
 
-However, Widget is mandatory as the top-level ViewModel-facing View unit.
+`Widget` is not a fundamentally different controller type from `Component`.
 
-Modules must not directly operate Components or Parts.
+Instead, Widget should be treated as a larger or more root-facing Component
+concept when that name is useful at the View naming layer.
 
-Modules may operate Widgets, and Widgets then own how Components and Parts are placed inside their DOM structure.
+The old `Part` concept is removed.
 
-Widgets are bundles that place Components and/or Parts inside their own DOM structure.
+Modules may operate root-facing Components, including Components whose View-side
+HTML files are categorized as Widgets.
+
+A parent Component may directly operate small internal elements inside its own
+DOM scope without turning all of them into independently addressed Components.
 
 Names such as `MVFDemoMainWidget`, `MVFDemoMainPanel`, and `MVFDemoMainContent` should be interpreted as the `Widget`, `Panel`, or content area belonging to the `MVFDemoMain` concept.
 
@@ -360,33 +396,35 @@ It does not define a required Panel structure.
 
 Component internals are free and should be designed according to the actual UI concept.
 
-A Widget HTML usually describes the placement structure for the Components it owns.
+A Widget HTML usually describes the placement structure for the larger
+Component-level unit it represents.
 
-However, a Widget is not required to place only Components.
+However, a Widget is not required to place only separately attached child
+Components.
 
-For a small Widget, it is acceptable for the Widget to directly place Parts and effectively compose itself as the Component-level structure.
+For a small Widget, it is acceptable for the parent Component to directly
+operate its internal inputs, buttons, messages, and other child elements
+without introducing additional child Components for every small node.
 
 When a Component exists only for one Widget, placing it under `UI/View/Components/{WidgetName}` is natural and preferred for clarity.
 
-Files under `UI/View/Components` and `UI/View/Parts` should not mechanically add `Component` or `Part` to their file names.
+Files under `UI/View/Components` should not mechanically add `Component` to
+their file names.
 
 Those folders are categories, while each file should be named after the actual UI concept it represents, such as `Form`, `Panel`, or another natural control name.
-
-When `UI/View/Parts` uses a subfolder for parts that belong to a specific parent component, the subfolder name should clearly identify that parent component, such as `MVFDemoMainPanel`.
-
-Avoid vague subfolder names such as `Main` when the folder exists because the parts belong to a more specific parent.
-
-However, creating parent-specific subfolders under `Parts` should be uncommon.
-
-Parts are generally expected to be reusable, generic UI units.
-
-It is acceptable to create a Part by combining multiple smaller UI elements, but many Parts that are tied to only one specific Component can indicate a design problem.
-
-Component-specific Part folders are allowed but should not become the default structure.
 
 Components may more naturally have Widget-specific subfolders because a Component may reasonably exist only for one Widget.
 
 `Widget` is different because Widget is an established MVF view control concept and may be included in Widget file names.
+
+Reusable generic controller classes such as text box Components may be attached
+after a parent Component finds the target child nodes.
+
+That attachment should not require every target node in the document to expose a
+global identifier.
+
+The parent Component should be able to find child nodes within its own local DOM
+scope and then attach reusable MVFComponent-derived controllers to those nodes.
 
 JS remains only the DOM driver that performs insertion, mutation, and event forwarding.
 
@@ -411,6 +449,7 @@ The foundation library should provide:
 - WebView2 hosting
 - DomDriver
 - DomScope
+- DomHandle or equivalent runtime node reference mechanism
 - JS/C# bridge
 - Event bridge
 - ViewComponent base systems
