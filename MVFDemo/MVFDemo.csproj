@@ -5,6 +5,7 @@
         <TargetFramework>net10.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>MVF.Demo</RootNamespace>
         <UseWPF>true</UseWPF>
     </PropertyGroup>
 
@@ -13,12 +14,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="src\UI\View\**\*.*">
+      <Content Include="src\UI\HTML\**\*.*">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="src\UI\HTML\Components\" />
+      <Folder Include="src\UI\HTML\Widgets\" />
       <Folder Include="src\UI\View\Components\" />
       <Folder Include="src\UI\View\Widgets\" />
     </ItemGroup>

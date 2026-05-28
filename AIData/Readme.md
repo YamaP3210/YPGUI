@@ -29,6 +29,7 @@ precedence unless they are explicitly updated.
 - Treat these files as the authoritative continuity context across AI sessions.
 - Prioritize AIData over chat memory when deciding project direction, architecture, naming, and coding style.
 - Treat the solution root `.editorconfig` as the Rider C# coding style baseline, but let the AIData coding rules override it when they differ.
+- Treat UTF-8 as the standard text encoding for this solution and avoid mixing Shift-JIS / CP932 text files unless there is an explicit legacy requirement.
 - Reload the relevant AIData files frequently during development, especially before design decisions, naming decisions, structural changes, and code edits.
 - Reflect important development decisions into the appropriate AIData file with high frequency so that AIData remains more authoritative than transient conversation context.
 - Do not remove or rewrite established rules casually. Update them only when the project direction has clearly changed.

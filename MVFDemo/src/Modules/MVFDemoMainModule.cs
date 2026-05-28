@@ -1,10 +1,12 @@
-﻿using MVF.Core;
+using MVF.Core;
+
+using MVF.Demo.UI.View.Widgets;
 
 
 
 
 
-namespace MVFDemo.Modules;
+namespace MVF.Demo.Modules;
 
 
 
@@ -12,8 +14,14 @@ namespace MVFDemo.Modules;
 
 public class MVFDemoMainModule : MVFModule
 {
-    protected override Task OnRequestLoadWidgetAsync ( )
+    private MVFDemoMainWidget _mainWidget = null!;
+
+
+    
+    
+
+    protected override async Task OnRequestLoadWidgetAsync ( )
     {
-        
+        _mainWidget = await LoadWidgetAsync<MVFDemoMainWidget> ( );
     }
 }

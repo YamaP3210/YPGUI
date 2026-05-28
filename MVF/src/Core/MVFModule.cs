@@ -1,4 +1,10 @@
-﻿namespace MVF.Core;
+using System.Threading.Tasks;
+
+
+
+
+
+namespace MVF.Core;
 
 
 
@@ -9,32 +15,36 @@ public abstract class MVFModule
     public async Task InitializeAsync ( )
     {
         OnInitialize ( );
-        await  OnInitializeAsync ( );
+        await OnInitializeAsync ( );
+        await OnRequestLoadWidgetAsync ( );
     }
 
 
 
     protected virtual void OnInitialize ( )
     {
-        
+
     }
 
 
 
-    protected async Task OnInitializeAsync ( )
+    protected virtual Task OnInitializeAsync ( )
     {
-        
+        return Task.CompletedTask;
     }
-    
+
 
 
     protected abstract Task OnRequestLoadWidgetAsync ( );
 
 
 
-    protected async Task<MVFNode> LoadWidgetAsync<T> ( ) where T : MVFComponent , new ( )
+    protected async Task<T> LoadWidgetAsync<T> ( ) where T : MVFWidget , new ( )
     {
-        var type = typeof ( T );
-        var widget = MVFNode.Find ( type.Name ).AddComponent<T> (  );
+        var widgetPlacementNode = await MVFNode.FindAsync ( MVFCoreNodeDefines.ViewCanvas );
+        var widget = new T ( );
+        var widgetNode = await widget.CreateWidgetNodeAsync ( widgetPlacementNode );
+
+        return await widgetNode.AddComponentAsync ( widget );
     }
 }

@@ -82,5 +82,15 @@ window.MVF.dom = {
         }
 
         targetEntry.element.innerHTML = viewHtml;
+    },
+
+    appendHtml: function (handleId, viewHtml) {
+        const targetEntry = this._handles.get(handleId);
+
+        if (!targetEntry) {
+            throw new Error('MVF handle was not found: ' + handleId);
+        }
+
+        targetEntry.element.insertAdjacentHTML('beforeend', viewHtml);
     }
 };

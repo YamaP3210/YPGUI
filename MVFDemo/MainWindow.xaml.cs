@@ -1,13 +1,9 @@
 using System.Windows;
 
-using MVF;
+using MVF.Demo.Modules;
 
 
-
-
-
-
-namespace MVFDemo;
+namespace MVF.Demo;
 
 
 
@@ -26,6 +22,11 @@ public partial class MainWindow : Window
     {
         base.OnContentRendered ( eventArgs );
 
-        await MVFController.RunAsync ( MVFContainer );
+        var mvfController = await MVFController.RunAsync ( MVFContainer );
+        var windowConfigurator = mvfController.GetWindowConfigurator ( );
+
+        await mvfController.LoadModuleAsync<MVFDemoMainModule> ( );
+
+        windowConfigurator.SetMenu ( "ファイル" , "閉じる" , ( ) => Close ( ) );
     }
 }

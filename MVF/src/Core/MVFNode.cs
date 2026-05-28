@@ -20,7 +20,7 @@ namespace MVF;
 public class MVFNode
 {
     private static WebView2? s_viewHost;
-    
+
 
 
 
@@ -34,9 +34,9 @@ public class MVFNode
 
 
 
-    public static WebView2 ViewHost
+    private static WebView2 ViewHost
     {
-        private get => s_viewHost ?? throw new InvalidOperationException ( "WebView is not attached." );
+        get => s_viewHost ?? throw new InvalidOperationException ( "WebView is not attached." );
         set
         {
             if ( s_viewHost is not null )
@@ -75,13 +75,31 @@ public class MVFNode
 
 
 
-    public T AddComponent<T> ( ) where T : MVFComponent , new ( )
+    public static void AttachViewHost ( WebView2 viewHost )
     {
-        RemoveComponent<T> (  );
+        ViewHost = viewHost;
+    }
+
+
+    
+    public async Task<T> AddComponentAsync<T> ( ) where T : MVFComponent , new ( )
+    {
         var component = new T ( );
+        return await AddComponentAsync ( component );
+    }
+
+
+
+    public async Task<T> AddComponentAsync<T> ( T component ) where T : MVFComponent
+    {
+        RemoveComponent ( component.GetType ( ) );
+
         component.BindNode ( this );
-        _componentList.Add ( typeof ( T ) , component );
-        return (T) _componentList [ typeof ( T ) ];
+        _componentList.Add ( component.GetType ( ) , component );
+
+        await component.InitializeAsync ( );
+
+        return component;
     }
 
 
@@ -105,7 +123,7 @@ public class MVFNode
     public T? GetComponent<T> ( ) where T : MVFComponent
     {
         if ( _componentList.ContainsKey ( typeof ( T ) ) )
-            return ( T ) _componentList[ typeof ( T ) ];
+            return ( T ) _componentList [ typeof ( T ) ];
         return null;
     }
 
@@ -113,8 +131,9 @@ public class MVFNode
 
     public void Dispose ( )
     {
-        var _copied = new Dictionary<Type , MVFComponent> ( _componentList );
-        foreach ( var component in _copied.Values )
+        var copiedComponentList = new Dictionary<Type , MVFComponent> ( _componentList );
+
+        foreach ( var component in copiedComponentList.Values )
             component.Dispose ( );
     }
 
@@ -125,6 +144,16 @@ public class MVFNode
         string handleJson = JsonSerializer.Serialize ( NodeHandle );
         string viewHtmlJson = JsonSerializer.Serialize ( viewHtml );
         string script = $"window.MVF.dom.setHtml({handleJson}, {viewHtmlJson});";
+        await ViewHost.ExecuteScriptAsync ( script );
+    }
+
+
+
+    public async Task AppendHtmlAsync ( string viewHtml )
+    {
+        string handleJson = JsonSerializer.Serialize ( NodeHandle );
+        string viewHtmlJson = JsonSerializer.Serialize ( viewHtml );
+        string script = $"window.MVF.dom.appendHtml({handleJson}, {viewHtmlJson});";
         await ViewHost.ExecuteScriptAsync ( script );
     }
 
