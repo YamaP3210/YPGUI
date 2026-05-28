@@ -134,9 +134,25 @@ The `MVFViewCanvas` DOM bridge script is stored separately in
 `src/UI/JS/MVFViewCanvasDom.js` and injected into the HTML canvas template at
 load time.
 
-`MVFController` creates the WebView2 host, assigns it to `MVFNode.WebView`,
-and keeps the `MVFViewCanvas` DOM node handle after the canvas HTML has been
-navigated and the DOM is available.
+`MVFController.RunAsync(...)` is the MVF runtime startup entry point.
+It returns the running `MVFController` instance.
+The same instance is then used for instance-bound runtime operations such as:
+
+- module loading
+- CSS / JS loading into the client runtime
+- access to the window-wide configurator
+
+`MVFController` creates the WebView2 host, attaches it to `MVFNode` through
+`MVFNode.AttachViewHost(...)`, and keeps the `MVFViewCanvas` DOM node handle
+after the canvas HTML has been navigated and the DOM is available.
+
+Because MVF currently assumes one running window/controller per application
+startup path, calling `RunAsync(...)` again while MVF is already running should
+be treated as an error.
+
+Window-wide operations such as menu configuration and window property changes
+belong to `MVFWindowConfigurator`, which is obtained from the running
+controller instance by `GetWindowConfigurator()`.
 
 `MVFNode` does not expose a generic JavaScript execution surface.
 Instead, node-targeted operations are limited to purpose-specific bridge
@@ -171,6 +187,10 @@ Header region:
 - Hosts menus, toolbars, command bars, and other upper window UI.
 - Belongs to the WPF/XAML side.
 - Concrete content, size, visibility, layout, and style are customized by the consumer-side View definition.
+- The current MVF frame implementation exposes a dedicated menu host in
+  `MVFRoot.xaml`.
+- Menu configuration is a window-level concern and is handled through
+  `MVFWindowConfigurator`, not through HTML Widgets.
 
 Client region:
 - Hosts the actual application runtime UI area.
@@ -436,6 +456,10 @@ The MVF HTML root should be named `MVFViewCanvas`.
 
 `MVFViewCanvas` is the HTML/DOM-side root canvas loaded into the WPF/WebView2 host.
 
+`MVFViewCanvas` is also the fixed top-level placement root for Widget loading
+inside the client surface.
+No HTML UI exists above `MVFViewCanvas` on the DOM side.
+
 MVF should not define or manage the consumer application's CSS structure.
 
 The MVF-provided `MVFViewCanvas.css` should only provide the minimum initial values required for the HTML view root to fill the WebView2 surface.
@@ -460,6 +484,8 @@ Application modules are loaded and controlled by C#.
 
 `MVFController.LoadModuleAsync<T>()` is the application-side module bootstrap
 entry point.
+In the current runtime model, this is an instance method on the running
+`MVFController`.
 It creates a module instance and runs its initialization flow.
 
 During module initialization:
@@ -478,6 +504,25 @@ This means the framework minimum set is now:
 - node-scoped HTML replacement
 - module loading and initialization
 - CSS / JS loading for the canvas surface
+
+Top-level Widget loading now follows this practical flow:
+
+1. `MVFViewCanvas` is found as the fixed placement root
+2. a Widget-specific host node is created under it
+3. the Widget HTML is inserted into that host node
+4. the Widget root node is found by `data-ui-id`
+5. the Widget Component is attached to that node
+
+So top-level Widget loading is effectively:
+
+- spawn
+- find
+- attach
+
+This differs from ordinary child Component attachment, which is usually:
+
+- find
+- attach
 
 Modules should not be imported or owned by the frame HTML.
 
@@ -500,6 +545,17 @@ The consumer application View folder should be named `UI/View`, not `UI/Views`.
 
 `UI/View` should contain View-side assets such as `Frame`, `Widgets`, and
 `Components`.
+
+On the application asset side, `UI/HTML` should contain the HTML-side assets.
+The current practical subcategories are:
+
+- `UI/HTML/Widgets`
+- `UI/HTML/Components`
+- `UI/HTML/CSS`
+- `UI/HTML/JS`
+
+Application-side CSS and JS belong there and are separate from the MVF
+framework-side canvas infrastructure files.
 
 `Widgets` and `Components` are View construction units below the module control
 layer.
