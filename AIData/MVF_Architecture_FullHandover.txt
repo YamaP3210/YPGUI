@@ -110,6 +110,51 @@ JS:
 - Utility functions only
 
 JS must NOT own application state.
+
+## C# to JS Invocation Model
+
+The current C# to JS invocation style uses WebView2 script execution from C#.
+
+Typical flow:
+
+- C# prepares a purpose-specific bridge call as a string
+- `WebView2.ExecuteScriptAsync(...)` sends the bridge call into the loaded page
+- JS exposes callable entry points under `window.MVF.dom`
+
+Example JS-side entry points currently used by the framework:
+
+- `window.MVF.dom.loadStyle(...)`
+- `window.MVF.dom.loadJS(...)`
+- `window.MVF.dom.setHtml(...)`
+
+This is a direct script-injection style bridge, not a host-object RPC model.
+No host object binding is currently required for the existing flow.
+
+The `MVFViewCanvas` DOM bridge script is stored separately in
+`src/UI/JS/MVFViewCanvasDom.js` and injected into the HTML canvas template at
+load time.
+
+`MVFController` creates the WebView2 host, assigns it to `MVFNode.WebView`,
+and keeps the `MVFViewCanvas` DOM node handle after the canvas HTML has been
+navigated and the DOM is available.
+
+`MVFNode` does not expose a generic JavaScript execution surface.
+Instead, node-targeted operations are limited to purpose-specific bridge
+methods such as `SetHtmlAsync(...)`, `SetContextAsync(...)`, and
+`GetContextAsync(...)`.
+
+The node-level flow is:
+
+- `MVFController` creates the WebView2 host
+- `MVFController` assigns that host to `MVFNode.WebView`
+- `MVFController` loads the canvas HTML together with its CSS and JS set
+- `MVFController` resolves the `MVFViewCanvas` DOM node and keeps its handle
+- `MVFNode.SetHtmlAsync(...)` serializes its handle and updated HTML
+- `window.MVF.dom.setHtml(...)` targets a DOM node through its handle, not
+  through `data-ui-id`
+- `MVFNode.Find(...)` is the node lookup API and replaces any previous
+  `MVFController.Find(...)` responsibility
+
 ---
 
 # Window Composition
@@ -132,6 +177,15 @@ Client region:
 - Uses WebView2-based client content.
 - HTML/CSS/DOM define the visible UI inside each WebView2 client content.
 - C# owns runtime state, orchestration, and DOM control.
+- In the current initialization flow, `MVFController` receives the placement
+  container, connects `MVFClientArea` into `MVFRoot.xaml`'s
+  `MVFClientAreaHost`, and then acquires the WebView instance from
+  `MVFViewHost` inside `MVFClientArea`
+- After acquiring `MVFViewHost`, `MVFController` loads the `ViewCanvas` HTML
+  together with its CSS and JS set into the WebView2 runtime
+- The `MVFViewCanvas` DOM node is resolved only after the `ViewCanvas` HTML
+  has been navigated and the DOM is available. The controller keeps that node
+  handle instead of attaching a separate `MVFViewCanvas` component.
 
 Footer region:
 - Hosts status bars, notifications, progress indicators, and other lower window UI.
@@ -139,6 +193,36 @@ Footer region:
 - Concrete content, size, visibility, layout, and style are customized by the consumer-side View definition.
 
 MVF must not fix concrete Header/Footer design or region sizes. These belong to the View customization layer.
+
+## Current Hierarchy Model
+
+The current hierarchy model should be preserved in the same visual format as the discussion input.
+
+```text
+MVFアプリケーション・コンテナ
+　|
+  └─ MVFRoot.xaml
+     (MCFClientAreaHost)
+     |
+     └─ MVFClientArea.xaml
+        (MVFViewHost)
+        |
+-------------------------------------
+        |
+        └─MVFViewCanvas.html
+          <main data-ui-id="MVFViewCanvas>
+          |
+          |─Wiget
+　　　　　|
+          └─Wiget
+```
+
+Notes:
+
+- The spacing, vertical bars, and separator line are part of the visual reference format.
+- Items in parentheses are internal elements, not separate child nodes.
+- The `MVFViewCanvas.html` root contains the `main` element shown in the reference layout.
+- The `Wiget` spelling is preserved here as it appeared in the original discussion input.
 
 ## Client Content Model
 
@@ -214,6 +298,43 @@ Component's DOM scope by local search such as `name`, role-like attributes,
 or other suitable local selectors.
 
 MVF should avoid turning the entire HTML tree into a globally-addressed ID map.
+
+Node identity rules:
+
+- HTML `id` and MVF node identity are separate concepts
+- In MVF, `data-ui-id` is treated as the node ID
+- In MVF, `data-ui-name` is treated as the node name
+- `data-ui-id` is the externally addressable identifier used for MVF node
+  lookup and handle acquisition
+- `data-ui-name` is the externally addressable name value used for MVF lookup
+  and display-oriented node naming
+- The HTML `id` attribute, if used, remains a separate HTML concern and is not
+  the MVF node ID
+- `data-ui-id` is preferred when a UI unit should be explicitly addressable,
+  but it is not mandatory for every element
+- `data-ui-name` follows the same overall policy as `data-ui-id`
+- When explicit MVF addressing is not needed, HTML `id` may be used as a
+  simpler alternative
+- If `data-ui-id` is not present, MVF may fall back to the HTML `id` attribute
+  as a secondary lookup key
+- If `data-ui-name` is not present, MVF may also fall back to the HTML `id`
+  attribute as a secondary lookup key for name-oriented use
+- The fallback `id` lookup is secondary and should not replace `data-ui-id` as
+  the preferred MVF identifier
+- If a request would normally modify an `id`, MVF should modify `data-ui-id`
+  instead when the intent is to address the MVF node identity
+- If `data-ui-id` does not already exist on the target element, MVF should add
+  it
+- If `data-ui-name` does not already exist on the target element, MVF should add
+  it when a name is needed
+- `id` should not be rewritten as a substitute for MVF node identity changes
+- MVF may reference the HTML `id` attribute in read-only fashion
+- `data-ui-id` is the MVF override target for node identity changes
+- `data-ui-name` is the MVF override target for node name changes
+- `id` remains a read-only HTML-side reference, while `data-ui-id` is the
+  MVF-side identity value that may be added or changed
+- `id` remains a read-only HTML-side reference, while `data-ui-name` is the
+  MVF-side name value that may be added or changed
 
 When a parent Component finds a child node and wants to attach another
 Component instance to that exact node, MVF may use a JS-side runtime node
@@ -337,6 +458,27 @@ The initial frame HTML should act like a runtime scene root / canvas target, not
 
 Application modules are loaded and controlled by C#.
 
+`MVFController.LoadModuleAsync<T>()` is the application-side module bootstrap
+entry point.
+It creates a module instance and runs its initialization flow.
+
+During module initialization:
+
+- The module resolves the UI it needs.
+- Required Widgets are created or acquired.
+- The module pushes the required HTML into the `MVFViewCanvas` drawing area.
+- The module uses MVF node operations to update the canvas content in a
+  controlled, scoped manner.
+
+This means the framework minimum set is now:
+
+- WPF host composition
+- WebView2 canvas loading
+- MVF node lookup by handle
+- node-scoped HTML replacement
+- module loading and initialization
+- CSS / JS loading for the canvas surface
+
 Modules should not be imported or owned by the frame HTML.
 
 Instead, C# loads modules and then flows the required child View / Prefab HTML content into the frame HTML in order.
@@ -425,6 +567,104 @@ global identifier.
 
 The parent Component should be able to find child nodes within its own local DOM
 scope and then attach reusable MVFComponent-derived controllers to those nodes.
+
+## MVFNode and MVFComponent Relationship
+
+`MVFNode` is the runtime-side node host that represents a specific DOM node
+through a JS bridge handle or equivalent runtime node reference.
+
+`MVFComponent` is a C# runtime controller attached to one `MVFNode`.
+
+The relationship is intentionally close to a Unity-style `GameObject` and
+`Component` model:
+
+- `MVFNode` owns the runtime node handle
+- `MVFNode` stores attached `MVFComponent` instances
+- `MVFComponent` keeps a back-reference to its bound `MVFNode`
+- a Component operates its target DOM area through the node it is attached to
+
+The current design direction is:
+
+- one `MVFComponent` instance belongs to exactly one `MVFNode`
+- one `MVFNode` may hold multiple Components
+- Components on the same Node are distinguished by their concrete C# type
+- the same concrete Component type should not be attached more than once to the
+  same `MVFNode`
+
+`MVFNode` should be treated as the attachment point and lifetime owner for
+node-local Components.
+
+`MVFNode` itself is not a customization target. It is created as part of the
+DOM bridge flow and is intended to carry only a node handle or equivalent
+runtime reference for the DOM node it represents.
+
+When a Node is discarded, the attached Components under that Node should also be
+treated as no longer valid.
+
+When a DOM region is reacquired after replacement, a new `MVFNode` and new
+Component attachments may be required rather than assuming the old runtime
+attachments remain valid.
+
+`MVFNode` does not necessarily have to own a `WebView2` instance directly.
+The important requirement is that it can reach the WebView2-backed DOM runtime
+through a bridge, host context, or equivalent runtime reference.
+
+`MVFNode` may be created after a DOM node is found by JS and its handle is
+returned to C#.
+
+The intended flow is:
+
+- JS searches the DOM by hierarchy navigation or `data-ui-id`
+- JS resolves a specific DOM node
+- JS associates that node with a runtime handle
+- C# receives the handle and creates or updates the corresponding `MVFNode`
+- `MVFNode` uses that handle to target the exact DOM node for later operations
+
+`MVFNode` does not carry arbitrary custom data for user-defined behavior. Its
+role is the runtime identification and access wrapper for a DOM node plus its
+attached Components.
+
+The exact handle representation is still undecided on the JS side, so the C#
+side may temporarily use `object` for the handle type until the JS runtime
+implementation is finalized.
+
+The search model is intentionally close to Unity:
+
+- `MVFNode.Find(...)` acts like `GameObject.Find`
+- A `data-ui-id`-addressable Widget or other larger UI unit is the primary
+  target for direct lookup
+- `MVFNode.Find(...)` first searches `data-ui-id` and falls back to the HTML
+  `id` attribute when needed
+- Once a larger UI unit is found, smaller child UI elements are searched from
+  that `MVFNode` by hierarchy traversal
+- This hierarchy traversal is intended to behave like `Transform.Find`
+- The direct `Find` model is intended for relatively large UI feature units,
+  especially Widget-level UI
+- Smaller UI elements are normally not addressed directly from the root and are
+  instead resolved through the parent `MVFNode`
+
+Handle lifecycle rules:
+
+- When JS finds a DOM node by search, it stores the node in a handle list and
+  returns the handle to C#
+- After that, `MVFNode` can use its own handle to instruct JS which DOM node to
+  target uniquely
+- The JS bridge maintains a handle registry and resolves `MVFNode` operations
+  through that registry
+- `MVFNode` is the public-facing bridge entry point for node-targeted JS
+  execution
+- Any extra per-node runtime data should be stored as virtual data associated
+  with the handle, not as an HTML attribute such as `data-ui-value`
+- Handle-associated virtual data is runtime-only state and should be managed by
+  the JS bridge alongside the handle registry
+- The runtime-only per-handle virtual data is called `context`
+- `context` is stored as part of the handle registry entry and is not exposed
+  as an HTML attribute
+- `MVFNode` should provide get/set access to the associated `context`
+- If HTML is rewritten and a region is replaced, all handles within the replaced
+  region are discarded
+- If a DOM node is removed, that node's handle is also discarded
+- Discarded handles must be reacquired before the related node can be used again
 
 JS remains only the DOM driver that performs insertion, mutation, and event forwarding.
 

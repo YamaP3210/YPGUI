@@ -33,3 +33,6 @@ precedence unless they are explicitly updated.
 - Reflect important development decisions into the appropriate AIData file with high frequency so that AIData remains more authoritative than transient conversation context.
 - Do not remove or rewrite established rules casually. Update them only when the project direction has clearly changed.
 - When an important decision is made during development, update the appropriate file in this folder without waiting for a separate instruction.
+- If information obtained through discussion is concrete and not ambiguous, reflect it into the appropriate AIData file by AI judgment without waiting for an explicit user instruction.
+- Before any commit, review whether concrete and already-resolved discussion information remains unreflected in AIData, and if so, reflect it by AI judgment before committing.
+- Do not record ambiguous, tentative, or still-unresolved discussion points as settled AIData rules. Keep AIData for decisions that are sufficiently clear to preserve as project continuity context.

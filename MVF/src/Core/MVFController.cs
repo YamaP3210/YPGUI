@@ -1,14 +1,12 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 
 using Microsoft.Web.WebView2.Wpf;
 
 using MVF.Core;
-using MVF.Modules;
 
 
 
@@ -22,27 +20,34 @@ namespace MVF;
 
 public class MVFController
 {
-    private static MVFController? s_instance;
-
-    
-    
     private const string ViewCanvasHtmlResourceName = "MVF.UI.View.Canvas.MVFViewCanvas.html";
     
     
     
     private const string ViewCanvasCssResourceName = "MVF.UI.View.Canvas.MVFViewCanvas.css";
+
+
+
+    private const string ViewCanvasDomJsResourceName = "MVF.UI.JS.MVFViewCanvasDom.js";
+    
+    
+    
+    
+    
+    private static MVFController? s_instance;
+
+    
     
 
-
     private Panel _container;
+
+
+
+    private MVFNode _viewCanvasNode;
     
     
     
     private WebView2 _viewHost;
-
-
-
-    private MVFViewCanvas _viewCanvas;
     
     
     
@@ -68,22 +73,33 @@ public class MVFController
     {        
         _container = container;
         
-        var mvfRootFrame = LoadFrameElement( "MVFRootFrame" );
+        var mvfRootElement = LoadFrameElement( "MVFRoot" );
         
-        var mvfClientAreaFrame = LoadFrameElement( "MVFClientAreaFrame" );
-        var mvfClientAreaHost = mvfRootFrame.FindElement<ContentControl> ( "MVFClientAreaHost" );
-        mvfClientAreaHost.Content = mvfClientAreaFrame;
-        _container.Children.Add ( mvfRootFrame );
+        var mvfClientAreaElement = LoadFrameElement( "MVFClientArea" );
+        var mvfClientAreaHostElement = FindFrameElement<ContentControl> ( mvfRootElement , "MVFClientAreaHost" );
+        mvfClientAreaHostElement.Content = mvfClientAreaElement;
+        _container.Children.Add ( mvfRootElement );
         
-        _viewHost = mvfClientAreaFrame.FindElement<WebView2> ( "MVFViewHost" );
-        await MVFComponent.AttachViewHostAsync ( _viewHost );
+        _viewHost = FindFrameElement<WebView2> ( mvfClientAreaElement , "MVFViewHost" );
+        MVFNode.ViewHost = _viewHost;
         
         var viewCanvasHtml = await ReadResourceTextAsync ( ViewCanvasHtmlResourceName );
         var viewCanvasCss = await ReadResourceTextAsync ( ViewCanvasCssResourceName );
+        var viewCanvasDomJs = await ReadResourceTextAsync ( ViewCanvasDomJsResourceName );
         var composedViewCanvasHtml = viewCanvasHtml.Replace ( "{{MVFViewCanvasStyle}}", viewCanvasCss, StringComparison.Ordinal );
+        composedViewCanvasHtml = composedViewCanvasHtml.Replace ( "{{MVFViewCanvasDomScript}}", $"<script>{viewCanvasDomJs}</script>", StringComparison.Ordinal );
         _viewHost.NavigateToString (  composedViewCanvasHtml );
-
-        
+        _viewCanvasNode = await MVFNode.FindAsync ("MVFViewCanvas" );
+    }
+    
+    
+    
+    public T FindFrameElement<T> ( FrameworkElement rootElement , string elementName ) where T : FrameworkElement
+    {
+        object? element = rootElement.FindName ( elementName );
+        if ( element is T typedElement )
+            return typedElement;
+        throw new InvalidOperationException ( $"Frame element was not found: {elementName}" );
     }
     
     
@@ -110,5 +126,32 @@ public class MVFController
         using StreamReader resourceReader = new ( resourceStream );
 
         return await resourceReader.ReadToEndAsync ( );
+    }
+
+
+
+    public async Task<T> LoadModuleAsync<T> ( ) where T : MVFModule , new ( )
+    {
+        var module = new T ( );
+        await module.InitializeAsync ( );
+        return module;
+    }
+    
+    
+    
+    public async Task LoadStyleAsync ( Uri styleUri )
+    {
+        string styleUriJson = JsonSerializer.Serialize ( styleUri.ToString ( ) );
+        string script = $"window.MVF.dom.loadStyle({styleUriJson});";
+        await _viewHost.ExecuteScriptAsync ( script );
+    }
+
+
+
+    public async Task LoadJSAsync ( Uri jsUri )
+    {
+        string jsUriJson = JsonSerializer.Serialize ( jsUri.ToString ( ) );
+        string script = $"window.MVF.dom.loadJS({jsUriJson});";
+        await _viewHost.ExecuteScriptAsync ( script );
     }
 }

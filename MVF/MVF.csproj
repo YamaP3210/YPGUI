@@ -10,6 +10,7 @@
     <ItemGroup>
       <Folder Include="src\" />
       <Folder Include="src\UI\Frame\" />
+      <Folder Include="src\UI\JS\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -19,6 +20,7 @@
     <ItemGroup>
       <EmbeddedResource Include="src\UI\View\Canvas\MVFViewCanvas.html" LogicalName="MVF.UI.View.Canvas.MVFViewCanvas.html" />
       <EmbeddedResource Include="src\UI\View\Canvas\MVFViewCanvas.css" LogicalName="MVF.UI.View.Canvas.MVFViewCanvas.css" />
+      <EmbeddedResource Include="src\UI\JS\MVFViewCanvasDom.js" LogicalName="MVF.UI.JS.MVFViewCanvasDom.js" />
     </ItemGroup>
 
 </Project>

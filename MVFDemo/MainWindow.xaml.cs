@@ -26,6 +26,6 @@ public partial class MainWindow : Window
     {
         base.OnContentRendered ( eventArgs );
 
-        await MVFController.Start ( MVFContainer );
+        await MVFController.RunAsync ( MVFContainer );
     }
 }

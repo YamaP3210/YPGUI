@@ -9,10 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="src\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\MVF\MVF.csproj" />
     </ItemGroup>
 
@@ -20,6 +16,11 @@
       <Content Include="src\UI\View\**\*.*">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="src\UI\View\Components\" />
+      <Folder Include="src\UI\View\Widgets\" />
     </ItemGroup>
 
 </Project>
