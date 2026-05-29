@@ -16,9 +16,11 @@ develop an application that uses MVF.
 ## Primary Files
 
 - `MVF_Architecture_FullHandover.txt`
-- `CSharpCodingRules_Current.txt`
 
-These files are the source of truth for MVF-side AI work.
+Master-only AI work uses this folder together with:
+
+- `AIData/CSharpCodingRules.txt`
+- `AIData/MVF/MVFCodingRules.txt`
 
 ## Scope
 
@@ -30,6 +32,10 @@ This folder may contain:
 - MVF maintenance policy
 - GitHub / release operation policy
 - AI collaboration policy for MVF development
+
+MVF-shared coding / naming rules that are also useful to MVF users should not
+be duplicated here.
+Place them under `AIData/MVF`.
 
 This folder must not be simplified just because some information is not needed
 by MVF users.

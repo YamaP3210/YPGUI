@@ -33,6 +33,13 @@ This folder should not contain:
 - GitHub management details for MVF itself
 - internal discussion history that is not needed to use MVF correctly
 
+## Files
+
+- `Readme_User.md`
+  - MVF usage guidance for application developers
+- `MVFCodingRules.txt`
+  - MVF-specific naming and structure rules
+
 ## Relationship To Master
 
 `AIData/MVF` must not define a different MVF specification.
@@ -216,21 +223,12 @@ business-logic-side code.
 
 ### Naming Rules
 
-For this solution family, the root identifier is `MVF`.
+Use these references together:
 
-Use these rules:
-
-- class names should follow `MVF + PascalCase`
-- interface names should follow `IMVF + PascalCase`
-- file names should normally match the main class name
-- names should read naturally in English
-- meaning is more important than mechanical naming
-
-For local variables:
-
-- use `camelCase`
-- use `var` when the type is obvious from the right-hand side
-- use an explicit type when it improves readability or intent
+- general C# rules:
+  - `AIData/CSharpCodingRules.txt`
+- MVF-family-specific naming and structure rules:
+  - `AIData/MVF/MVFCodingRules.txt`
 
 ### Text Encoding
 

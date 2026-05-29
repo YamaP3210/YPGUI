@@ -24,17 +24,16 @@ The important distinction is what is being developed.
 When developing MVF itself, the primary authority is:
 
 - `Readme.md`
+- `CSharpCodingRules.txt`
+- `MVF/MVFCodingRules.txt`
 - `Master/Readme_Master.md`
 - `Master/MVF_Architecture_FullHandover.txt`
-- `Master/CSharpCodingRules_Current.txt`
 
 If another AIData file conflicts with these files, these primary files take
 precedence unless they are explicitly updated.
 
-`MVF` is a generated / release-side view of the authoritative `Master`
-information.
-Do not treat files under `AIData/MVF` as the source of truth while maintaining
-MVF itself.
+`MVF` contains the release-side MVF usage view plus MVF-family shared rules.
+Master-only maintenance information must remain under `Master`.
 
 ## User Name Handling
 
@@ -84,6 +83,8 @@ Do not write user-dependent personal preferences there.
 ## Maintenance Policy
 
 - Keep the `Master` files updated when MVF philosophy, architecture, coding rules, or naming rules change.
+- Keep the root `CSharpCodingRules.txt` free from MVF-specific assumptions.
+- Keep MVF-specific naming and structure rules in `AIData/MVF`.
 - Prefer explicit updates over relying on chat history.
 - Treat AIData as the authoritative continuity context across AI sessions.
 - Prioritize AIData over chat memory when deciding project direction, architecture, naming, and coding style.

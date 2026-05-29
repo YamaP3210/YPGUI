@@ -1,0 +1,68 @@
+# MVF コーディング規約
+
+This file stores MVF-specific naming and structural rules that are intentionally
+separate from the generic `AIData/CSharpCodingRules.txt`.
+
+Use this file when the code being written belongs to the MVF solution family.
+
+## ソリューション識別子
+
+現時点の MVF 系定義:
+
+- 正式名称: Markup View Framework
+- ソリューション識別子: MVF
+- ルート名前空間: MVF
+- 型名・識別子のルートには `MVF` をそのまま使用する
+- 例: `MVFWindowRoot`, `MVFClientHost`, `MVFDomDriver`
+- `MvfWindowRoot` のように PascalCase 化して小文字化しない
+
+- ソリューションには正式名称と略称を定める
+- 略称はソリューション識別子として扱う
+- 略称は 2～4 文字程度、原則 3 文字とする
+- 略称は全て大文字とする
+- 略称は namespace・型名・識別子のルートとして使用する
+
+## ルート名前空間
+
+- ルート名前空間はソリューション識別子をそのまま使用する
+
+## src フォルダ
+
+- ソースコードなど開発部分のファイルは原則として `src` 配下へ配置する
+- `src` は物理構造用フォルダであり、名前空間には含めない
+
+## 名前空間とフォルダ構造
+
+- 名前空間は原則として `src` 配下のフォルダ構造と一致させる
+- プロジェクト内の名前空間は原則としてプロジェクト名配下に置く
+
+## 型命名規則
+
+- クラス名は `MVF + PascalCase` とする
+- インターフェイス名は `IMVF + PascalCase` とする
+- struct / record / delegate / enum も同様の識別子方針に従う
+
+## MVF アプリケーション側の構造
+
+- `UI/View` は C# 側 View 接続クラスの領域とする
+- `UI/HTML` は HTML / CSS / JS 資産の領域とする
+- `UI/Modules` は ViewModel / module control code の領域であり、`View` 配下へ置かない
+- `UI/HTML` の現在の実用サブカテゴリは次とする
+  - `Widgets`
+  - `Components`
+  - `CSS`
+  - `JS`
+
+## MVF ランタイム責務の前提
+
+- WPF はウィンドウとフレームのホスト側を担う
+- WebView2 はクライアント表示面を担う
+- HTML は UI 構造を担う
+- CSS は見た目を担う
+- C# は状態・制御・オーケストレーションを担う
+- JS は DOM ドライバに限定する
+
+## 参照関係
+
+- 一般的な C# 記述ルールは `AIData/CSharpCodingRules.txt` を参照する
+- MVF の設計思想・構造・責務分離は `AIData/MVF/Readme_User.md` を参照する
