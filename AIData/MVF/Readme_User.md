@@ -1,13 +1,10 @@
-# AIData_User
+# AIData/MVF
 
-This folder is the AI guidance area for third-party developers who build MVF
-applications.
+This folder is the release-side AI guidance area for developers who use MVF to
+build GUI applications.
 
-It is separate from the repository's own `AIData`.
-
-`AIData` is the framework author's private continuity memory for MVF itself.
-`AIData_User` is the distribution-side AI guidance area for people who develop
-applications on top of MVF.
+This folder is generated / extracted from `AIData/Master`.
+It is not the authoritative source for MVF maintenance.
 
 ## Purpose
 
@@ -16,36 +13,48 @@ Use this folder when an AI assistant needs to understand:
 - what MVF is
 - how MVF applications should be structured
 - how MVF should be used from an application project
-- which responsibilities belong to MVF framework code and which belong to app code
+- which responsibilities belong to MVF framework code and which belong to app
+  code
 
-This folder should be included in release-side template bundles.
+This folder is intended to be bundled with MVF release assets and templates.
 
-## Update Policy
+## Scope
 
-Files under `AIData_User` are intended to be split into two categories:
+This folder should contain:
 
-- files that are distributed and updated from MVF
-- files that are local to the third-party developer's own application work
+- current MVF public usage guidance
+- MVF application-side structure guidance
+- MVF naming and coding rules that matter to application development
+- AI usage guidance for building applications on top of MVF
 
-The distributed MVF-side files may be overwritten when a developer downloads a
-newer MVF release package.
+This folder should not contain:
 
-The local application-side files should be treated as project-local continuity
-files and should not be overwritten by MVF updates.
+- MVF master-side maintenance process
+- GitHub management details for MVF itself
+- internal discussion history that is not needed to use MVF correctly
 
-## Recommended Separation
+## Relationship To Master
 
-When expanding this folder for real distribution use, keep the contents
-separated by role.
+`AIData/MVF` must not define a different MVF specification.
 
-Recommended concept:
+It is a public-facing extraction of the same framework knowledge.
+The goal is not to hide the truth from the user-side AI.
+The goal is to hide unnecessary master-side operating context while preserving
+the same current MVF behavior and rules.
 
-- MVF-side guidance files
-  - overwritten when the developer updates MVF release assets
-- local application files
-  - maintained by the third-party developer for their own GUI application
+## User-Side Boundary
 
-## What MVF Is
+When operating from this folder, the target is an application that uses MVF.
+
+Do not casually shift into ideas such as:
+
+- changing `MVFController`
+- redesigning MVF internals
+- updating MVF architecture itself
+
+Those belong to `AIData/Master`.
+
+## Current Public Guidance
 
 MVF means Markup View Framework.
 
@@ -63,7 +72,7 @@ Current framework direction:
 MVF is currently Windows-only.
 Cross-platform support is not a current design goal.
 
-## Core Design Philosophy
+### Core Design Philosophy
 
 MVF is designed for explicit runtime control.
 
@@ -85,7 +94,7 @@ Avoid these assumptions unless the application explicitly chooses otherwise:
 - reactive ownership of UI state
 - JS ownership of application state
 
-## Layer Responsibilities
+### Layer Responsibilities
 
 Use these boundaries consistently.
 
@@ -123,7 +132,7 @@ JavaScript:
 - event forwarding
 - bridge utilities only
 
-## Frame and Client Structure
+### Frame and Client Structure
 
 Broad structure:
 
@@ -138,10 +147,9 @@ Application Window
 
 `MVFViewCanvas` is the fixed root container inside the WebView2 client surface.
 It is the parent placement area for top-level Widgets.
-
 No HTML UI exists above `MVFViewCanvas`.
 
-## Widget and Component Model
+### Widget and Component Model
 
 MVF uses a Node + Component style model.
 
@@ -171,7 +179,7 @@ Normal child Components usually follow:
 - find
 - attach
 
-## DOM Identity Rules
+### DOM Identity Rules
 
 MVF uses `data-ui-id` as the preferred MVF node identifier.
 
@@ -186,7 +194,7 @@ Important rules:
 
 Do not turn the full HTML tree into a global ID map unnecessarily.
 
-## Application-Side Folder Meaning
+### Application-Side Folder Meaning
 
 For MVF application projects, this layout is important:
 
@@ -203,9 +211,10 @@ For MVF application projects, this layout is important:
 - `UI/HTML/JS`
   - application-side JS
 
-Everything outside that UI area should generally be treated as business-logic-side code.
+Everything outside that UI area should generally be treated as
+business-logic-side code.
 
-## Naming Rules
+### Naming Rules
 
 For this solution family, the root identifier is `MVF`.
 
@@ -223,7 +232,7 @@ For local variables:
 - use `var` when the type is obvious from the right-hand side
 - use an explicit type when it improves readability or intent
 
-## Text Encoding
+### Text Encoding
 
 Use UTF-8 for text files.
 
@@ -236,21 +245,23 @@ This is important for:
 - Git
 - AI tooling
 
-## Window-Level Control
+### Window-Level Control
 
-Window-wide operations should be treated separately from client-side Widget logic.
+Window-wide operations should be treated separately from client-side Widget
+logic.
 
 Current direction:
 
 - application code obtains an `MVFController` instance from `RunAsync(...)`
 - the same instance can load modules and access a window-level configurator
+- window-wide behavior belongs to `MVFWindowConfigurator`
 - menu setup and other window-wide behavior belong to window-level control, not to Widget internals
 
-## AI Usage Guidance
+### AI Usage Guidance
 
 When AI assists MVF-based development, it should follow these behaviors:
 
-- read the architecture and coding rules before editing
+- read the MVF usage guidance before editing
 - preserve the WPF shell + WebView2 + HTML/CSS + C# ownership model
 - avoid introducing automatic synchronization systems casually
 - avoid moving application state ownership into JS
@@ -264,4 +275,5 @@ The assistant should act as:
 - implementation helper
 - consistency checker
 
-It should not behave as a framework generator that ignores the established MVF structure.
+It should not behave as a framework generator that ignores the established MVF
+structure.
