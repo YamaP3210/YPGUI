@@ -47,3 +47,12 @@ Master-side AI work must not drift into application design.
 When operating from `Master`, the target is the MVF framework itself.
 Do not think in terms of "what GUI application should be built" unless the user
 explicitly returns to application-side work.
+
+## Public Guidance Requirement
+
+The MVF release-side guidance under `AIData/MVF` must remain self-contained for
+MVF user-side operation.
+
+That means public MVF guidance must explicitly describe the startup user-name
+selection flow and the `AIData/User/<UserName>` handling model instead of
+depending on `AIData/Master` knowledge.

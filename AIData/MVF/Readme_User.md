@@ -18,6 +18,10 @@ Use this folder when an AI assistant needs to understand:
 
 This folder is intended to be bundled with MVF release assets and templates.
 
+This public MVF-side guidance must be self-contained enough that an AI can
+start operating correctly for an MVF user even if the root AIData files are not
+present.
+
 ## Scope
 
 This folder should contain:
@@ -60,6 +64,55 @@ Do not casually shift into ideas such as:
 - updating MVF architecture itself
 
 Those belong to `AIData/Master`.
+
+## Startup User Selection
+
+Before using local AI operating data for an MVF application project, the AI
+must first ask the current user name.
+
+This is required even when only `AIData/MVF` is loaded.
+
+The user name selects the local operating context.
+It is not authentication.
+
+After the user answers:
+
+1. treat that exact value as the current user name
+2. use `AIData/User/<UserName>` as the user-local data folder
+3. if that folder does not exist yet, create it
+4. initialize a minimal `Readme_User.md` in that folder when needed
+5. from that point onward, read only the selected user's folder
+
+Do not read multiple user folders at the same time.
+
+The minimum initial `Readme_User.md` may contain:
+
+- a title using the user name
+- one sentence that the folder stores local operating context for that user
+
+Public MVF-side operation must not depend on knowing any special master user
+name.
+If master-side identity rules exist in a fuller source tree, they are outside
+the minimum requirement for MVF user-side operation.
+
+## Local AIData Areas Used By MVF Projects
+
+MVF user-side AI operation uses three kinds of information:
+
+- `AIData/MVF`
+  - MVF usage guidance shared by all MVF users
+- `AIData/User/<UserName>`
+  - user-local preferences, notes, and working tendencies
+- `AIData/Solutions/<SolutionName>`
+  - objective information for the current application / solution
+
+Recommended loading order for an MVF application project:
+
+1. read `AIData/MVF`
+2. ask the current user name
+3. read or create `AIData/User/<UserName>`
+4. read the current solution folder under `AIData/Solutions/<SolutionName>` if
+   it exists
 
 ## Current Public Guidance
 
@@ -260,12 +313,16 @@ Current direction:
 When AI assists MVF-based development, it should follow these behaviors:
 
 - read the MVF usage guidance before editing
+- ask the current user name before reading user-local AIData
+- create `AIData/User/<UserName>` when the selected user folder does not exist
 - preserve the WPF shell + WebView2 + HTML/CSS + C# ownership model
 - avoid introducing automatic synchronization systems casually
 - avoid moving application state ownership into JS
 - keep XAML minimal and frame-oriented
 - keep business logic outside UI asset folders
 - prefer incremental, reviewable changes over monolithic generation
+- read only the selected user's folder and never mix multiple user-local
+  folders in one operating context
 
 The assistant should act as:
 
